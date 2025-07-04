@@ -1,0 +1,125 @@
+@{
+    ViewData["Title"] = "À propos";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>ℹ️ À propos du FTPS Client Radarr</h1>
+            <p class="lead">Interface de test pour valider les connexions FTPS et la détection de releases scene.</p>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>🎯 Objectif du Projet</h3>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Cette application web permet de tester et valider l'implémentation du client FTPS pour Radarr.
+                        Elle offre une interface intuitive pour configurer et tester les connexions FTPS vers des serveurs privés.
+                    </p>
+                    
+                    <h5>🔧 Fonctionnalités Principales</h5>
+                    <ul>
+                        <li><strong>Test de connexion FTPS</strong> : Validation des paramètres de connexion</li>
+                        <li><strong>Support SSL/TLS</strong> : Chiffrement Explicit et Implicit</li>
+                        <li><strong>Détection de releases scene</strong> : Reconnaissance automatique des formats warez</li>
+                        <li><strong>Scoring intelligent</strong> : Évaluation de la qualité des releases</li>
+                        <li><strong>Presets de test</strong> : Configurations rapides pour serveurs publics</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3>📋 Informations Techniques</h3>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <td><strong>Framework</strong></td>
+                            <td>ASP.NET Core 6.0</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bibliothèque FTPS</strong></td>
+                            <td>FluentFTP 52.1.0</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Interface</strong></td>
+                            <td>Bootstrap 5.1.3</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Validation</strong></td>
+                            <td>FluentValidation</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Logging</strong></td>
+                            <td>NLog</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h3>🔐 Sécurité</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li>✅ Chiffrement TLS 1.2/1.3</li>
+                        <li>✅ Validation des certificats</li>
+                        <li>✅ Connexions sécurisées</li>
+                        <li>✅ Timeout configurable</li>
+                        <li>✅ Retry logic robuste</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>🚀 Intégration Radarr</h3>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Cette application de test utilise les mêmes composants que l'implémentation complète du client FTPS pour Radarr :
+                    </p>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>📦 Composants Principaux</h6>
+                            <ul>
+                                <li><code>Ftps.cs</code> - Client principal</li>
+                                <li><code>FtpsSettings.cs</code> - Configuration</li>
+                                <li><code>FtpsProxy.cs</code> - Gestionnaire FluentFTP</li>
+                                <li><code>FtpsItem.cs</code> - Modèles de données</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>🧪 Tests Disponibles</h6>
+                            <ul>
+                                <li><code>FtpsFixture.cs</code> - Tests client principal</li>
+                                <li><code>FtpsProxyFixture.cs</code> - Tests proxy</li>
+                                <li><code>FtpsSettingsFixture.cs</code> - Tests configuration</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <strong>Note :</strong> Cette application de test permet de valider le fonctionnement du client FTPS 
+                        avant son intégration complète dans Radarr. Tous les tests réussis ici garantissent le bon fonctionnement 
+                        dans l'environnement de production.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

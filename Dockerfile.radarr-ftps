@@ -1,0 +1,114 @@
+# 🎯 Dockerfile pour Radarr avec Support FTPS
+# =============================================
+
+FROM mcr.microsoft.com/dotnet/sdk:6.0-focal
+
+# Métadonnées
+LABEL maintainer="FTPS Client Integration"
+LABEL version="1.0.0"
+LABEL description="Radarr with FTPS Download Client Support"
+
+# Variables d'environnement
+ENV DEBIAN_FRONTEND=noninteractive
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
+ENV ASPNETCORE_URLS=http://+:7878
+
+# Installer les dépendances système
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    git \
+    sqlite3 \
+    ca-certificates \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Installer Node.js 18 LTS (pour le frontend)
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs
+
+# Configurer Git pour éviter les erreurs de compilation
+RUN git config --global user.email "ftps-test@radarr.video" \
+    && git config --global user.name "FTPS Test User" \
+    && git config --global init.defaultBranch main
+
+# Créer l'utilisateur radarr
+RUN groupadd -r radarr && useradd -r -g radarr radarr
+
+# Créer les répertoires nécessaires
+RUN mkdir -p /app /config /downloads /movies \
+    && chown -R radarr:radarr /app /config /downloads /movies
+
+# Définir le répertoire de travail
+WORKDIR /app
+
+# Copier les fichiers sources
+COPY --chown=radarr:radarr . .
+
+# Initialiser un repo Git propre pour éviter les erreurs de build
+RUN rm -rf .git \
+    && git init \
+    && git add . \
+    && git commit -m "Initial commit with FTPS integration"
+
+# Passer à l'utilisateur radarr
+USER radarr
+
+# Restaurer les dépendances NuGet
+RUN cd src && dotnet restore
+
+# Compiler le frontend (si nécessaire)
+RUN if [ -d "frontend" ]; then \
+        cd frontend && \
+        npm ci --only=production && \
+        npm run build && \
+        cd ..; \
+    fi
+
+# Compiler Radarr avec support FTPS
+RUN cd src && \
+    dotnet build --configuration Release --no-restore && \
+    dotnet publish Radarr.Host/Radarr.Host.csproj \
+        --configuration Release \
+        --output /app/bin \
+        --no-build \
+        --self-contained false
+
+# Créer le script de démarrage
+RUN echo '#!/bin/bash\n\
+echo "🚀 Démarrage de Radarr avec Support FTPS"\n\
+echo "========================================"\n\
+echo ""\n\
+echo "📋 Informations :"\n\
+echo "   • URL: http://localhost:7878"\n\
+echo "   • Support FTPS: ✅ Activé"\n\
+echo "   • Configuration: Settings → Download Clients → Add → FTPS"\n\
+echo "   • Test Rebex: host=test.rebex.net user=demo pass=password"\n\
+echo ""\n\
+cd /app/bin\n\
+exec dotnet Radarr.Host.dll\n\
+' > /app/start.sh && chmod +x /app/start.sh
+
+# Exposer le port
+EXPOSE 7878
+
+# Volumes pour la persistance
+VOLUME ["/config", "/downloads", "/movies"]
+
+# Variables d'environnement pour Radarr
+ENV XDG_CONFIG_HOME=/config
+ENV XDG_DATA_HOME=/config
+
+# Commande de démarrage
+CMD ["/app/start.sh"]
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:7878/system/status || exit 1
+
+# Labels additionnels
+LABEL org.opencontainers.image.title="Radarr with FTPS Support"
+LABEL org.opencontainers.image.description="Movie collection manager with FTPS download client integration"
+LABEL org.opencontainers.image.url="https://radarr.video"
+LABEL org.opencontainers.image.source="https://github.com/Radarr/Radarr"
+LABEL org.opencontainers.image.vendor="Radarr Community"
