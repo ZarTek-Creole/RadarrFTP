@@ -1,0 +1,280 @@
+@model RadarrFtpsWeb.Models.FtpsConfigModel
+@{
+    ViewData["Title"] = "Test Client FTPS Radarr";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="mb-4">🎯 Test Client FTPS pour Radarr</h1>
+            <p class="lead">Interface de test pour valider les connexions FTPS et la détection de releases scene.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3>📡 Configuration FTPS</h3>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="loadPreset('rebex')">Rebex Test</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="loadPreset('filezilla')">FileZilla Test</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form asp-action="TestConnection" method="post" id="ftpsForm">
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label"></label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label asp-for="Host" class="form-label"></label>
+                                    <input asp-for="Host" class="form-control" placeholder="ftps.exemple.com" />
+                                    <span asp-validation-for="Host" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="Port" class="form-label"></label>
+                                    <input asp-for="Port" class="form-control" />
+                                    <span asp-validation-for="Port" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Username" class="form-label"></label>
+                                    <input asp-for="Username" class="form-control" />
+                                    <span asp-validation-for="Username" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Password" class="form-label"></label>
+                                    <input asp-for="Password" class="form-control" type="password" />
+                                    <span asp-validation-for="Password" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3 form-check">
+                                    <input asp-for="UseSsl" class="form-check-input" />
+                                    <label asp-for="UseSsl" class="form-check-label"></label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="EncryptionMode" class="form-label"></label>
+                                    <select asp-for="EncryptionMode" class="form-select">
+                                        <option value="1">Explicit FTPS</option>
+                                        <option value="2">Implicit FTPS</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3 form-check">
+                                    <input asp-for="ValidateCertificate" class="form-check-input" />
+                                    <label asp-for="ValidateCertificate" class="form-check-label"></label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="RemoteBasePath" class="form-label"></label>
+                                    <input asp-for="RemoteBasePath" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Timeout" class="form-label"></label>
+                                    <input asp-for="Timeout" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="RetryAttempts" class="form-label"></label>
+                                    <input asp-for="RetryAttempts" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="testBtn">
+                            <span class="spinner-border spinner-border-sm d-none" id="spinner"></span>
+                            🔍 Tester la Connexion
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            @if (ViewBag.ShowResult == true)
+            {
+                var result = ViewBag.TestResult as RadarrFtpsWeb.Models.FtpsTestResult;
+                <div class="card">
+                    <div class="card-header">
+                        <h3>📊 Résultats du Test</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert @(result.Success ? "alert-success" : "alert-danger")">
+                            @result.Message
+                            @if (result.Success)
+                            {
+                                <br><small>Temps de connexion: @result.ConnectionTime.TotalMilliseconds ms</small>
+                            }
+                        </div>
+
+                        @if (result.Details.Any())
+                        {
+                            <h5>🔧 Détails Techniques</h5>
+                            <ul class="list-group mb-3">
+                                @foreach (var detail in result.Details)
+                                {
+                                    @if (detail.Key != "SceneReleases" && detail.Key != "ErrorDetails")
+                                    {
+                                        <li class="list-group-item d-flex justify-content-between">
+                                            <strong>@detail.Key:</strong>
+                                            <span>@detail.Value</span>
+                                        </li>
+                                    }
+                                }
+                            </ul>
+                        }
+
+                        @if (result.Files.Any())
+                        {
+                            <h5>📁 Fichiers Trouvés (@result.Files.Count premiers)</h5>
+                            <div class="list-group mb-3" style="max-height: 300px; overflow-y: auto;">
+                                @foreach (var file in result.Files)
+                                {
+                                    <div class="list-group-item small">@file</div>
+                                }
+                            </div>
+                        }
+
+                        @if (result.Details.ContainsKey("SceneReleases"))
+                        {
+                            var sceneReleases = result.Details["SceneReleases"] as List<RadarrFtpsWeb.Services.SceneRelease>;
+                            if (sceneReleases?.Any() == true)
+                            {
+                                <h5>🎬 Releases Scene Détectées</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Titre</th>
+                                                <th>Année</th>
+                                                <th>Qualité</th>
+                                                <th>Source</th>
+                                                <th>Score</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var release in sceneReleases.Take(10))
+                                            {
+                                                <tr>
+                                                    <td>@release.Title</td>
+                                                    <td>@release.Year</td>
+                                                    <td><span class="badge bg-primary">@release.Quality</span></td>
+                                                    <td><span class="badge bg-secondary">@release.Source</span></td>
+                                                    <td><span class="badge bg-success">@release.Score</span></td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                        }
+
+                        @if (result.Details.ContainsKey("ErrorDetails") && !result.Success)
+                        {
+                            <div class="mt-3">
+                                <button class="btn btn-sm btn-outline-danger" type="button" data-bs-toggle="collapse" data-bs-target="#errorDetails">
+                                    Voir les détails de l'erreur
+                                </button>
+                                <div class="collapse mt-2" id="errorDetails">
+                                    <div class="card card-body">
+                                        <pre class="small">@result.Details["ErrorDetails"]</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h3>ℹ️ Instructions</h3>
+                    </div>
+                    <div class="card-body">
+                        <h5>🚀 Comment tester :</h5>
+                        <ol>
+                            <li><strong>Utilisez un preset</strong> : Cliquez sur "Rebex Test" ou "FileZilla Test" pour une configuration rapide</li>
+                            <li><strong>Ou configurez manuellement</strong> : Remplissez les champs avec vos paramètres FTPS</li>
+                            <li><strong>Cliquez sur "Tester la Connexion"</strong> pour valider</li>
+                        </ol>
+
+                        <h5>📡 Serveurs de test publics :</h5>
+                        <ul>
+                            <li><strong>Rebex</strong> : test.rebex.net (demo/password)</li>
+                            <li><strong>FileZilla</strong> : demo.filezilla-project.org (demo/demo)</li>
+                        </ul>
+
+                        <h5>🔐 Fonctionnalités testées :</h5>
+                        <ul>
+                            <li>✅ Connexion FTPS SSL/TLS</li>
+                            <li>✅ Authentification</li>
+                            <li>✅ Listing des fichiers</li>
+                            <li>✅ Détection releases scene</li>
+                            <li>✅ Scoring automatique</li>
+                        </ul>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    function loadPreset(preset) {
+        fetch(`/Home/Presets?preset=${preset}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('Name').value = data.name;
+                document.getElementById('Host').value = data.host;
+                document.getElementById('Port').value = data.port;
+                document.getElementById('Username').value = data.username;
+                document.getElementById('Password').value = data.password;
+                document.getElementById('UseSsl').checked = data.useSsl;
+                document.getElementById('EncryptionMode').value = data.encryptionMode;
+                document.getElementById('ValidateCertificate').checked = data.validateCertificate;
+                document.getElementById('RemoteBasePath').value = data.remoteBasePath;
+                document.getElementById('Timeout').value = data.timeout;
+                document.getElementById('RetryAttempts').value = data.retryAttempts;
+            });
+    }
+
+    document.getElementById('ftpsForm').addEventListener('submit', function() {
+        const btn = document.getElementById('testBtn');
+        const spinner = document.getElementById('spinner');
+        
+        btn.disabled = true;
+        spinner.classList.remove('d-none');
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Test en cours...';
+    });
+</script>
