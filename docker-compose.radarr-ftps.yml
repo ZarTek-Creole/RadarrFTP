@@ -1,0 +1,113 @@
+# 🎯 Docker Compose pour Radarr avec Support FTPS
+# =================================================
+
+version: '3.8'
+
+services:
+  radarr-ftps:
+    build:
+      context: .
+      dockerfile: Dockerfile.radarr-ftps
+    container_name: radarr-ftps
+    hostname: radarr-ftps
+    ports:
+      - "7878:7878"
+    volumes:
+      - radarr-config:/config
+      - radarr-downloads:/downloads
+      - radarr-movies:/movies
+      - ./logs:/app/logs
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Paris
+      - XDG_CONFIG_HOME=/config
+      - XDG_DATA_HOME=/config
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7878/system/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - radarr-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.radarr.rule=Host(`radarr.local`)"
+      - "traefik.http.services.radarr.loadbalancer.server.port=7878"
+
+  # Service de test FTPS (optionnel)
+  ftps-test:
+    image: delfer/alpine-ftp-server
+    container_name: ftps-test-server
+    ports:
+      - "21:21"
+      - "21000-21010:21000-21010"
+    environment:
+      - USERS=testuser|testpass|/home/testuser|1000
+      - ADDRESS=localhost
+    volumes:
+      - ftps-test-data:/home/testuser
+    networks:
+      - radarr-network
+    profiles:
+      - testing
+
+volumes:
+  radarr-config:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/config
+  
+  radarr-downloads:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/downloads
+  
+  radarr-movies:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/movies
+  
+  ftps-test-data:
+    driver: local
+
+networks:
+  radarr-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# 📋 Instructions d'utilisation :
+# 
+# 1. Créer les répertoires :
+#    mkdir -p data/{config,downloads,movies} logs
+# 
+# 2. Lancer Radarr avec FTPS :
+#    docker-compose -f docker-compose.radarr-ftps.yml up -d
+# 
+# 3. Accéder à l'interface :
+#    http://localhost:7878
+# 
+# 4. Configurer le client FTPS :
+#    Settings → Download Clients → Add → FTPS
+# 
+# 5. Tester avec Rebex :
+#    Host: test.rebex.net
+#    Port: 21
+#    User: demo
+#    Pass: password
+# 
+# 6. Arrêter les services :
+#    docker-compose -f docker-compose.radarr-ftps.yml down
+# 
+# 7. Avec serveur de test FTP local :
+#    docker-compose -f docker-compose.radarr-ftps.yml --profile testing up -d
