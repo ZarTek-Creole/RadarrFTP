@@ -4,5 +4,11 @@ echo =========================================
 echo.
 echo Web Interface: http://localhost:7878
 echo.
-dotnet Radarr.Host.dll
+echo ✅ FTPS Indexer: Settings → Indexers → Add Indexer → "FTPS Indexer"
+echo ✅ FTPS Client: Settings → Download Clients → Add → "FTPS Client"
+echo.
+echo Starting Radarr Console Application...
+Radarr.Console.exe
+echo.
+echo Radarr has stopped.
 pause
