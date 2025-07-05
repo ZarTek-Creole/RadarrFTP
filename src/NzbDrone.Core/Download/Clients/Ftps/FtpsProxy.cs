@@ -9,6 +9,7 @@ using FluentFTP;
 using NLog;
 using NzbDrone.Common.Extensions;
 using System.Net;
+using NzbDrone.Core.Indexers.Ftps;
 
 namespace NzbDrone.Core.Download.Clients.Ftps
 {
@@ -19,6 +20,12 @@ namespace NzbDrone.Core.Download.Clients.Ftps
         Task<bool> DownloadFileAsync(FtpsSettings settings, string remotePath, string localPath);
         Task<bool> FileExistsAsync(FtpsSettings settings, string path);
         Task<long> GetFileSizeAsync(FtpsSettings settings, string path);
+        
+        // Indexer support
+        Task<bool> TestConnectionAsync(FtpsIndexerSettings settings);
+        Task<IEnumerable<FtpsDirectoryItem>> GetDirectoryListingAsync(FtpsIndexerSettings settings, string path);
+        Task<bool> FileExistsAsync(FtpsIndexerSettings settings, string path);
+        Task<long> GetFileSizeAsync(FtpsIndexerSettings settings, string path);
     }
 
     public class FtpsProxy : IFtpsProxy
@@ -61,7 +68,8 @@ namespace NzbDrone.Core.Download.Clients.Ftps
                     FullPath = item.FullName,
                     Size = item.Size,
                     IsDirectory = item.Type == FtpObjectType.Directory,
-                    ModifiedDate = item.Modified
+                    ModifiedDate = item.Modified,
+                    LastModified = item.Modified
                 });
             }
             catch (Exception ex)
@@ -159,6 +167,43 @@ namespace NzbDrone.Core.Download.Clients.Ftps
             }
             
             return client;
+        }
+
+        // Indexer support methods
+        public async Task<bool> TestConnectionAsync(FtpsIndexerSettings settings)
+        {
+            return await TestConnectionAsync(ConvertToFtpsSettings(settings));
+        }
+
+        public async Task<IEnumerable<FtpsDirectoryItem>> GetDirectoryListingAsync(FtpsIndexerSettings settings, string path)
+        {
+            return await GetDirectoryListingAsync(ConvertToFtpsSettings(settings), path);
+        }
+
+        public async Task<bool> FileExistsAsync(FtpsIndexerSettings settings, string path)
+        {
+            return await FileExistsAsync(ConvertToFtpsSettings(settings), path);
+        }
+
+        public async Task<long> GetFileSizeAsync(FtpsIndexerSettings settings, string path)
+        {
+            return await GetFileSizeAsync(ConvertToFtpsSettings(settings), path);
+        }
+
+        private FtpsSettings ConvertToFtpsSettings(FtpsIndexerSettings indexerSettings)
+        {
+            return new FtpsSettings
+            {
+                Host = indexerSettings.Host,
+                Port = indexerSettings.Port,
+                Username = indexerSettings.Username,
+                Password = indexerSettings.Password,
+                SecurityMode = indexerSettings.SecurityMode,
+                ConnectionMode = indexerSettings.ConnectionMode,
+                ValidateCertificate = indexerSettings.ValidateCertificate,
+                BasePath = indexerSettings.BasePath ?? string.Empty,
+                MovieDirectory = indexerSettings.MovieDirectory ?? string.Empty
+            };
         }
     }
 }
