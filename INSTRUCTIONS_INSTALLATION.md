@@ -2,12 +2,12 @@
 
 ## 📦 CONTENU DU PACKAGE
 
-Ce package contient une version complète de Radarr v4 avec intégration FTPS native :
+Ce package contient une version complète de Radarr v4 avec intégration FTPS native et interface utilisateur complète :
 
 - **Radarr.exe** - Application principale (Windows 64-bit)
 - **FluentFTP.dll** - Client FTPS haute performance (v48.0.2)
 - **Tous les runtimes .NET 6.0** - Fonctionnement autonome
-- **Interface utilisateur complète** - Interface web intégrée
+- **Interface utilisateur complète** - Interface web React/TypeScript intégrée
 - **Scripts de build** - Pour recompiler si nécessaire
 
 ## 🚀 INSTALLATION RAPIDE
@@ -16,7 +16,7 @@ Ce package contient une version complète de Radarr v4 avec intégration FTPS na
 ```bash
 # Extraire le contenu du ZIP
 cd C:\Radarr_FTPS
-# Décompresser Radarr_v4_FTPS_Windows.zip ici
+# Décompresser Radarr_v4_FTPS_Windows_Complete.zip ici
 ```
 
 ### 2. Premier Lancement
@@ -28,6 +28,7 @@ cd C:\Radarr_FTPS
 
 ### 3. Accès Interface Web
 - **URL** : http://localhost:7878
+- **Interface** : ✅ **Interface web complète maintenant incluse**
 - **Authentification** : Configurée au premier lancement
 - **Clé API** : Générée automatiquement
 
@@ -145,6 +146,13 @@ netsh advfirewall firewall add rule name="FTPS" dir=in action=allow protocol=TCP
 ✅ Vérifier NAT/routeur
 ```
 
+#### 4. Interface Web (Résolu ✅)
+```
+✅ Tous les fichiers UI inclus dans le package
+✅ index.html et favicon.ico présents
+✅ Interface React/TypeScript complète
+```
+
 ## 🔍 LOGS ET DIAGNOSTIC
 
 ### Logs Radarr
@@ -209,7 +217,24 @@ Settings → Download Clients → Test Connection
 
 ---
 
-**Version** : Radarr v4 with FTPS Integration
+## 📝 NOTES DE VERSION
+
+### Version Complète (v2)
+- ✅ **Interface UI complète** maintenant incluse
+- ✅ **Résolution du problème 404** lors de l'accès web
+- ✅ **Tous les fichiers statiques** (HTML, CSS, JS, images)
+- ✅ **Favicon et icônes** présents
+- ✅ **Interface React/TypeScript** entièrement fonctionnelle
+
+### Version Précédente (v1)
+- ❌ Interface UI manquante (erreur 404)
+- ✅ Backend FTPS fonctionnel
+- ✅ API REST disponible
+
+---
+
+**Version** : Radarr v4 with FTPS Integration (Complete UI)
 **Build** : Windows x64 Self-Contained
-**Taille** : 98 MB compressé / 228 MB décompressé
+**Taille** : 107 MB compressé / 262 MB décompressé
 **Compatibilité** : Windows 7/8/10/11 (64-bit)
+**Interface** : ✅ **Interface web complète incluse**
