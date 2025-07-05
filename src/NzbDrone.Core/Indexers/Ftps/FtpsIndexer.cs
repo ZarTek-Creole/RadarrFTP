@@ -137,9 +137,12 @@ namespace NzbDrone.Core.Indexers.Ftps
                     {
                         var movieFiles = FtpsProxy.GetDirectoryListingAsync(Settings, $"{Settings.MovieDirectory}/{directory.Name}").Result;
                         
-                        foreach (var file in movieFiles.Where(f => !f.IsDirectory && IsVideoFile(f.Name)))
+                        // Sélectionner le meilleur fichier dans le dossier
+                        var bestFile = SelectBestFile(movieFiles.Where(f => !f.IsDirectory));
+                        
+                        if (bestFile != null)
                         {
-                            var release = CreateReleaseInfo(directory.Name, file);
+                            var release = CreateReleaseInfo(directory.Name, bestFile);
                             if (release != null)
                             {
                                 releases.Add(release);
@@ -160,6 +163,38 @@ namespace NzbDrone.Core.Indexers.Ftps
             }
 
             return releases;
+        }
+
+        private FtpsDirectoryItem SelectBestFile(IEnumerable<FtpsDirectoryItem> files)
+        {
+            if (!files.Any()) return null;
+
+            var fileList = files.ToList();
+
+            // 1. Priorité aux fichiers vidéo directs
+            var videoFiles = fileList.Where(f => IsVideoFile(f.Name)).ToList();
+            if (videoFiles.Any())
+            {
+                return videoFiles.OrderByDescending(f => f.Size).First();
+            }
+
+            // 2. Priorité aux archives (RAR, ZIP, 7Z)
+            var archiveFiles = fileList.Where(f => IsArchiveFile(f.Name)).ToList();
+            if (archiveFiles.Any())
+            {
+                // Pour les RAR multi-parts, prendre le fichier principal (.rar)
+                var mainRar = archiveFiles.FirstOrDefault(f => f.Name.ToLowerInvariant().EndsWith(".rar"));
+                if (mainRar != null)
+                {
+                    return mainRar;
+                }
+
+                // Sinon prendre la plus grosse archive
+                return archiveFiles.OrderByDescending(f => f.Size).First();
+            }
+
+            // 3. Sinon prendre le plus gros fichier
+            return fileList.OrderByDescending(f => f.Size).First();
         }
 
         private ReleaseInfo CreateReleaseInfo(string directoryName, FtpsDirectoryItem file)
@@ -192,7 +227,8 @@ namespace NzbDrone.Core.Indexers.Ftps
                     InfoUrl = $"ftps://{Settings.Host}:{Settings.Port}/{Settings.MovieDirectory}/{directoryName}",
                     PublishDate = file.LastModified,
                     Size = file.Size,
-                    IndexerFlags = 0
+                    IndexerFlags = 0,
+                    DownloadProtocol = DownloadProtocol.Ftps
                 };
             }
             catch (Exception ex)
@@ -206,6 +242,26 @@ namespace NzbDrone.Core.Indexers.Ftps
         {
             var videoExtensions = new[] { ".mkv", ".mp4", ".avi", ".mov", ".wmv", ".flv", ".webm", ".m4v", ".mpg", ".mpeg", ".ts", ".m2ts" };
             return videoExtensions.Any(ext => fileName.ToLowerInvariant().EndsWith(ext));
+        }
+
+        private bool IsArchiveFile(string fileName)
+        {
+            var archiveExtensions = new[] { ".rar", ".zip", ".7z", ".tar", ".gz", ".bz2", ".xz" };
+            var lowerName = fileName.ToLowerInvariant();
+            
+            // Vérifier les extensions d'archives
+            if (archiveExtensions.Any(ext => lowerName.EndsWith(ext)))
+            {
+                return true;
+            }
+            
+            // Vérifier les fichiers RAR multi-parts (.r00, .r01, etc.)
+            if (System.Text.RegularExpressions.Regex.IsMatch(lowerName, @"\.r\d{2}$"))
+            {
+                return true;
+            }
+            
+            return false;
         }
     }
 }
