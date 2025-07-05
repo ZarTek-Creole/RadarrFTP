@@ -10,7 +10,7 @@ using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Http;
 using NzbDrone.Core.Configuration;
-using NzbDrone.Core.Download.Clients.Ftps;
+
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Localization;
 using NzbDrone.Core.Parser.Model;
@@ -268,5 +268,6 @@ namespace NzbDrone.Core.Download.Clients.Ftps
         }
     }
 }
+
 
 
