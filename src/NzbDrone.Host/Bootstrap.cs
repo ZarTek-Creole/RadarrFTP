@@ -38,7 +38,8 @@ namespace NzbDrone.Host
             "Radarr.Core",
             "Radarr.SignalR",
             "Radarr.Api.V3",
-            "Radarr.Http"
+            "Radarr.Http",
+            "Radarr.Windows"
         };
 
         public static void Start(string[] args, Action<IHostBuilder> trayCallback = null)
