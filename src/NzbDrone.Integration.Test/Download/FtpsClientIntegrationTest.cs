@@ -2,12 +2,12 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Download.Clients.Ftps;
-using NzbDrone.Integration.Test.Framework;
+using NLog;
 
 namespace NzbDrone.Integration.Test.Download
 {
     [TestFixture]
-    public class FtpsClientIntegrationTest : IntegrationTest
+    public class FtpsClientIntegrationTest
     {
         private FtpsSettings _settings;
 
@@ -32,7 +32,7 @@ namespace NzbDrone.Integration.Test.Download
         public async Task should_connect_to_test_server()
         {
             // Arrange
-            var proxy = new FtpsProxy(new LoggerMock());
+            var proxy = new FtpsProxy(LogManager.GetCurrentClassLogger());
 
             // Act
             var result = await proxy.TestConnectionAsync(_settings);
@@ -45,7 +45,7 @@ namespace NzbDrone.Integration.Test.Download
         public async Task should_get_directory_listing()
         {
             // Arrange
-            var proxy = new FtpsProxy(new LoggerMock());
+            var proxy = new FtpsProxy(LogManager.GetCurrentClassLogger());
 
             // Act
             var items = await proxy.GetDirectoryListingAsync(_settings, "/pub/example");
@@ -58,7 +58,7 @@ namespace NzbDrone.Integration.Test.Download
         public async Task should_check_file_exists()
         {
             // Arrange
-            var proxy = new FtpsProxy(new LoggerMock());
+            var proxy = new FtpsProxy(LogManager.GetCurrentClassLogger());
 
             // Act
             var exists = await proxy.FileExistsAsync(_settings, "/pub/example/readme.txt");
@@ -89,14 +89,6 @@ namespace NzbDrone.Integration.Test.Download
             };
             var validResult = validSettings.Validate();
             validResult.IsValid.Should().BeTrue();
-        }
-    }
-
-    // Mock logger for tests
-    public class LoggerMock : NLog.Logger
-    {
-        public LoggerMock() : base()
-        {
         }
     }
 }

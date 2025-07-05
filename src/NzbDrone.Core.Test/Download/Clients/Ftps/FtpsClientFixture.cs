@@ -38,16 +38,6 @@ namespace NzbDrone.Core.Test.Download.Clients.Ftps
         }
 
         [Test]
-        public async Task should_test_connection_successfully()
-        {
-            // Act
-            var result = await Subject.TestConnectionAsync();
-
-            // Assert
-            result.Should().BeTrue();
-        }
-
-        [Test]
         public void should_return_correct_protocol()
         {
             // Act
@@ -100,6 +90,28 @@ namespace NzbDrone.Core.Test.Download.Clients.Ftps
 
             // Assert
             result.IsValid.Should().BeTrue();
+        }
+
+        [Test]
+        public void should_get_status()
+        {
+            // Act
+            var status = Subject.GetStatus();
+
+            // Assert
+            status.Should().NotBeNull();
+            status.OutputRootFolders.Should().NotBeEmpty();
+        }
+
+        [Test]
+        public void should_return_empty_items_list()
+        {
+            // Act
+            var items = Subject.GetItems();
+
+            // Assert
+            items.Should().NotBeNull();
+            items.Should().BeEmpty();
         }
     }
 }

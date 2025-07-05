@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using FluentFTP;
 using NLog;
 using NzbDrone.Common.Extensions;
+using System.Net;
 
 namespace NzbDrone.Core.Download.Clients.Ftps
 {
@@ -35,7 +36,7 @@ namespace NzbDrone.Core.Download.Clients.Ftps
             
             try
             {
-                await client.ConnectAsync();
+                await client.Connect();
                 return client.IsConnected;
             }
             catch (Exception ex)
@@ -51,8 +52,8 @@ namespace NzbDrone.Core.Download.Clients.Ftps
             
             try
             {
-                await client.ConnectAsync();
-                var items = await client.GetListingAsync(path);
+                await client.Connect();
+                var items = await client.GetListing(path);
                 
                 return items.Select(item => new FtpsDirectoryItem
                 {
@@ -76,9 +77,9 @@ namespace NzbDrone.Core.Download.Clients.Ftps
             
             try
             {
-                await client.ConnectAsync();
-                var result = await client.DownloadFileAsync(localPath, remotePath);
-                return result.IsSuccess();
+                await client.Connect();
+                var result = await client.DownloadFile(localPath, remotePath);
+                return result == FtpStatus.Success;
             }
             catch (Exception ex)
             {
@@ -93,8 +94,8 @@ namespace NzbDrone.Core.Download.Clients.Ftps
             
             try
             {
-                await client.ConnectAsync();
-                return await client.FileExistsAsync(path);
+                await client.Connect();
+                return await client.FileExists(path);
             }
             catch (Exception ex)
             {
@@ -109,8 +110,8 @@ namespace NzbDrone.Core.Download.Clients.Ftps
             
             try
             {
-                await client.ConnectAsync();
-                return await client.GetFileSizeAsync(path);
+                await client.Connect();
+                return await client.GetFileSize(path);
             }
             catch (Exception ex)
             {
@@ -119,9 +120,14 @@ namespace NzbDrone.Core.Download.Clients.Ftps
             }
         }
 
-        private FtpClient CreateClient(FtpsSettings settings)
+        private AsyncFtpClient CreateClient(FtpsSettings settings)
         {
-            var client = new FtpClient(settings.Host, settings.Port, settings.Username, settings.Password);
+            var client = new AsyncFtpClient();
+            
+            // Configuration de base
+            client.Host = settings.Host;
+            client.Port = settings.Port;
+            client.Credentials = new NetworkCredential(settings.Username, settings.Password);
             
             // Configuration SSL/TLS
             switch (settings.SecurityMode)
