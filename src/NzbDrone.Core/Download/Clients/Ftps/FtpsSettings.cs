@@ -77,7 +77,3 @@ namespace NzbDrone.Core.Download.Clients.Ftps
         Force = 2
     }
 }
-
-
-
-

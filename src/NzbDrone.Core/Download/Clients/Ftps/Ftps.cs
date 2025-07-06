@@ -268,6 +268,3 @@ namespace NzbDrone.Core.Download.Clients.Ftps
         }
     }
 }
-
-
-

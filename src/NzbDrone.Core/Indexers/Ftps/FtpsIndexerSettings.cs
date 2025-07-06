@@ -60,7 +60,3 @@ namespace NzbDrone.Core.Indexers.Ftps
         }
     }
 }
-
-
-
-
