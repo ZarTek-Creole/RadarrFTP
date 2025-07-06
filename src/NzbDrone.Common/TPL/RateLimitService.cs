@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Threading.Tasks;
-using NLog;
-using NzbDrone.Common.Cache;
-using NzbDrone.Common.Extensions;
-
-namespace NzbDrone.Common.TPL
+﻿namespace NzbDrone.Common.TPL
 {
+    using System;
+    using System.Collections.Concurrent;
+    using System.Threading.Tasks;
+    using NLog;
+    using NzbDrone.Common.Cache;
+    using NzbDrone.Common.Extensions;
+
     public interface IRateLimitService
     {
         void WaitAndPulse(string key, TimeSpan interval);

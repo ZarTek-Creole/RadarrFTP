@@ -1,14 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using ICSharpCode.SharpZipLib.Core;
-using ICSharpCode.SharpZipLib.GZip;
-using ICSharpCode.SharpZipLib.Tar;
-using ICSharpCode.SharpZipLib.Zip;
-using NLog;
-
 namespace NzbDrone.Common
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using ICSharpCode.SharpZipLib.Core;
+    using ICSharpCode.SharpZipLib.GZip;
+    using ICSharpCode.SharpZipLib.Tar;
+    using ICSharpCode.SharpZipLib.Zip;
+    using NLog;
+
     public interface IArchiveService
     {
         void Extract(string compressedFile, string destination);

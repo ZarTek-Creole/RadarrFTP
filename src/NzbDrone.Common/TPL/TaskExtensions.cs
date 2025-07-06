@@ -1,9 +1,9 @@
-using System.Threading.Tasks;
-using NLog;
-using NzbDrone.Common.Instrumentation;
-
 namespace NzbDrone.Common.TPL
 {
+    using System.Threading.Tasks;
+    using NLog;
+    using NzbDrone.Common.Instrumentation;
+
     public static class TaskExtensions
     {
         private static readonly Logger Logger = NzbDroneLogger.GetLogger(typeof(TaskExtensions));

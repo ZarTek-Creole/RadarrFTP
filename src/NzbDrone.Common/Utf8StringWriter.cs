@@ -1,9 +1,10 @@
-using System.IO;
-using System.Text;
-
-namespace NzbDrone.Common;
-
-public class Utf8StringWriter : StringWriter
+namespace NzbDrone.Common
 {
-    public override Encoding Encoding => Encoding.UTF8;
+    using System.IO;
+    using System.Text;
+
+    public class Utf8StringWriter : StringWriter
+    {
+        public override Encoding Encoding => Encoding.UTF8;
+    }
 }
